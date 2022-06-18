@@ -83,6 +83,11 @@ public class HttpResponse {
 		file = "web" + file;    
 		System.out.println("send file: " + file);
 		
+		Session ses = Session.getInstance();
+		Object obj = ses.get("localhost");
+		
+		System.out.println("Obj: " + obj.toString());
+		
 		String msg = "";
 		boolean isExist = new File(file).exists();
 		if (isExist) {
