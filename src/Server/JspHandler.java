@@ -28,15 +28,6 @@ public class JspHandler {
 		return msg;
 	}
 	
-	private String getParamValue(String params[], String name) {
-		for (String param : params) {
-			String tokens[] = param.split("=");
-			if (tokens.length == 2 && tokens[0].equals(name)) return tokens[1];
-		}
-
-		return null;
-	}
-	
 	private String getClassName(String file) {
 		int idx = file.lastIndexOf(".jsp");
 		return idx < 0 ? "" : file.substring(0, idx).replaceAll("/", ".");
