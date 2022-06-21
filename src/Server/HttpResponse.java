@@ -1,3 +1,4 @@
+package Server;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -39,6 +40,7 @@ public class HttpResponse {
 		String msg = "HTTP/1.1 200\n";
 		msg += "Content-Type: image/jpeg\n";
 		msg += "Content-length" + bytes.length + "\n";
+		msg += "\n";
 		
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		bao.write(msg.getBytes());
@@ -76,35 +78,44 @@ public class HttpResponse {
 		return flag;
 	}
 	
-	public void send(OutputStream os, String file) throws IOException {
-		// HTML 파일이 저장되는 루트 디렉토리를 web으로 지정
-		// class 파일이 저장되는 bin 디렉토리 아래에 HTML 파일을 저장할 web 디렉토리 생성 
-		// web/index.html
-		file = "web" + file;    
-		System.out.println("send file: " + file);
-		
-		Session ses = Session.getInstance();
-		Object obj = ses.get("localhost");
-		
-		System.out.println("Obj: " + obj.toString());
-		
-		String msg = "";
-		boolean isExist = new File(file).exists();
-		if (isExist) {
-			if (isImage(file)) {
-				byte bytes[] = getMsgImage(file);
-				sendBytes(os, bytes);
+	private boolean isJsp(String file) {
+		int idx = file.lastIndexOf(".");
+		String ext = idx > 0 ? file.substring(idx + 1) : "";
+		return ext.equals("jsp");
+	}
+	
+	public void send(OutputStream os, String host, String file, String params[]) throws IOException {
+		if (isJsp(file)) new JspHandler().send(os, host, file, params);
+		else {
+			// HTML 파일이 저장되는 루트 디렉토리를 web으로 지정
+			// class 파일이 저장되는 bin 디렉토리 아래에 HTML 파일을 저장할 web 디렉토리 생성 
+			// web/index.html
+			file = "web" + file;    
+			System.out.println("send file: " + file);
+			
+			//Session ses = Session.getInstance();
+			//Object obj = ses.get("localhost");
+			
+			//System.out.println("Obj: " + obj.toString());
+			
+			String msg = null;
+			boolean isExist = new File(file).exists();
+			if (isExist) {
+				if (isImage(file)) {
+					byte bytes[] = getMsgImage(file);
+					sendBytes(os, bytes);
+				} else {
+					msg = getMsgText(file);
+					sendText(os, msg);
+				}
 			} else {
-				msg = getMsgText(file);
+				msg = getMsgNotFound();
 				sendText(os, msg);
 			}
-		} else {
-			msg = getMsgNotFound();
-			sendText(os, msg);
+			
+			System.out.println(msg + "\n\n\n");	
 		}
 		
-		System.out.println(msg);
 		
-		sendText(os, msg);
 	}
 }
